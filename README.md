@@ -9,7 +9,8 @@ L'application respecte des règles métier strictes et propose des espaces diff�
 Système de rôles : 3 niveaux d'accès sécurisés (Étudiant, Enseignant, Administrateur).  
 Tableaux de bord : Vues personnalisées par rôle affichant les cours, statistiques et notifications.
 Administration complète : Gestion des utilisateurs, des cours, et des inscriptions aux enseignements.
-Gestion des évaluations : Saisie des notes (CC, DS, Projets) et calcul automatique des moyennes.  Emploi du temps : Affichage dynamique des séances, des salles et des enseignants.
+Gestion des évaluations : Saisie des notes (CC, DS, Projets) et calcul automatique des moyennes.
+Emploi du temps : Affichage dynamique des séances, des salles et des enseignants.
 
 
 Architecture & Technologies
