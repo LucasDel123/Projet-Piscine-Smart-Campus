@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . 'Projet-Piscine-Smart-Campus/backend/config/database.php';
+require_once __DIR__ . 'bakend/config_database.php';
 
 class Database {
     private static $instance = null;
