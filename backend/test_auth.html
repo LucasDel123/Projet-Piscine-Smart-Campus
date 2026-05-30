@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test authentification — SmartCampus</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      max-width: 460px;
+      margin: 50px auto;
+      padding: 0 20px;
+      color: #1a1a2e;
+    }
+    h1 { font-size: 1.3rem; }
+    p.sub { color: #555; font-size: 0.9rem; margin-top: -8px; }
+    label { display: block; margin: 14px 0 6px; font-weight: 600; font-size: 0.9rem; }
+    input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+    .row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+    button {
+      flex: 1;
+      min-width: 120px;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .b-login  { background: #2563eb; }
+    .b-login:hover  { background: #1d4ed8; }
+    .b-me     { background: #0d9488; }
+    .b-me:hover     { background: #0f766e; }
+    .b-logout { background: #dc2626; }
+    .b-logout:hover { background: #b91c1c; }
+    pre {
+      margin-top: 20px;
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 16px;
+      border-radius: 8px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-size: 0.85rem;
+      min-height: 40px;
+    }
+    .ok { color: #4ade80; font-weight: 700; }
+    .ko { color: #f87171; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <h1>🔐 Test d'authentification</h1>
+  <p class="sub">Page de test temporaire de l'API SmartCampus</p>
+
+  <label for="email">Email</label>
+  <input type="email" id="email" value="lucas.delliste@edu.ece.fr">
+
+  <label for="mdp">Mot de passe</label>
+  <input type="password" id="mdp" value="mateolpb">
+
+  <div class="row">
+    <button class="b-login"  id="btnLogin">1. Se connecter</button>
+    <button class="b-me"     id="btnMe">2. Qui suis-je ?</button>
+    <button class="b-logout" id="btnLogout">3. Se déconnecter</button>
+  </div>
+
+  <pre id="resultat">Le résultat s'affichera ici…</pre>
+
+  <script>
+    const resultat = document.getElementById('resultat');
+
+    async function appel(url, options, titre) {
+      resultat.textContent = titre + ' en cours…';
+      try {
+        const reponse = await fetch(url, options);
+        const data = await reponse.json();
+        const etat = data.success
+          ? '<span class="ok">✅ SUCCÈS</span>'
+          : '<span class="ko">❌ ÉCHEC</span>';
+        resultat.innerHTML = titre + ' → ' + etat + ' (HTTP ' + reponse.status + ')\n\n'
+          + JSON.stringify(data, null, 2);
+      } catch (err) {
+        resultat.innerHTML = titre + ' → <span class="ko">❌ ERREUR</span>\n\n' + err.message;
+      }
+    }
+
+    document.getElementById('btnLogin').addEventListener('click', () => {
+      appel('api/auth/login.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: document.getElementById('email').value,
+          mot_de_passe: document.getElementById('mdp').value
+        })
+      }, 'Connexion');
+    });
+
+    document.getElementById('btnMe').addEventListener('click', () => {
+      appel('api/auth/me.php', { method: 'GET' }, 'Qui suis-je');
+    });
+
+    document.getElementById('btnLogout').addEventListener('click', () => {
+      appel('api/auth/logout.php', { method: 'POST' }, 'Déconnexion');
+    });
+  </script>
+</body>
+</html>
