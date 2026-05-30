@@ -1,6 +1,6 @@
 <?php
 require_once 'bakend/config_cors.php';
-require_once '../../utils/response.php';
+require_once 'bakend/json_reponse.php';
 require_once '../../classes/Database.php';
 require_once '../../classes/Auth.php';
 
