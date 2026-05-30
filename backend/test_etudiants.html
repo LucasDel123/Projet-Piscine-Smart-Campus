@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test étudiants — SmartCampus</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      max-width: 760px;
+      margin: 40px auto;
+      padding: 0 20px;
+      color: #1a1a2e;
+    }
+    h1 { font-size: 1.3rem; }
+    h2 { font-size: 1rem; margin-top: 28px; border-bottom: 2px solid #e2e8f0; padding-bottom: 6px; }
+    .sub { color: #555; font-size: 0.9rem; margin-top: -8px; }
+    input {
+      padding: 9px 11px; border: 1px solid #ccc; border-radius: 8px;
+      font-size: 0.95rem; box-sizing: border-box; margin: 4px 0;
+    }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    button {
+      padding: 10px 14px; border: none; border-radius: 8px; color: white;
+      font-size: 0.9rem; font-weight: 600; cursor: pointer; margin: 4px 4px 4px 0;
+    }
+    .b-blue { background: #2563eb; } .b-blue:hover { background: #1d4ed8; }
+    .b-teal { background: #0d9488; } .b-teal:hover { background: #0f766e; }
+    .b-red  { background: #dc2626; padding: 5px 10px; font-size: 0.8rem; }
+    .b-red:hover { background: #b91c1c; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.88rem; }
+    th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #e2e8f0; }
+    th { background: #f1f5f9; }
+    #msg {
+      margin-top: 12px; padding: 10px 14px; border-radius: 8px;
+      font-size: 0.9rem; display: none;
+    }
+    .ok { background: #dcfce7; color: #166534; }
+    .ko { background: #fee2e2; color: #991b1b; }
+  </style>
+</head>
+<body>
+  <h1>👥 Test — Gestion des étudiants</h1>
+  <p class="sub">Page de test temporaire de l'API SmartCampus</p>
+
+  <h2>1. Connexion (admin)</h2>
+  <input type="email" id="email" value="lucas.delliste@edu.ece.fr" style="width: 280px;">
+  <input type="password" id="mdp" value="mateolpb" style="width: 160px;">
+  <button class="b-blue" id="btnLogin">Se connecter</button>
+
+  <h2>2. Ajouter un étudiant</h2>
+  <div class="grid" style="max-width: 520px;">
+    <input id="c_nom" placeholder="Nom">
+    <input id="c_prenom" placeholder="Prénom">
+    <input id="c_email" placeholder="Email">
+    <input id="c_filiere" placeholder="Filière (ex: Informatique)">
+    <input id="c_niveau" placeholder="Niveau (ex: L2)">
+  </div>
+  <button class="b-teal" id="btnCreate">Ajouter</button>
+
+  <h2>3. Liste des étudiants</h2>
+  <button class="b-blue" id="btnList">Rafraîchir la liste</button>
+  <div id="msg"></div>
+  <table>
+    <thead>
+      <tr><th>ID</th><th>N° étu.</th><th>Nom</th><th>Prénom</th><th>Email</th><th>Filière</th><th>Niveau</th><th></th></tr>
+    </thead>
+    <tbody id="tbody">
+      <tr><td colspan="8" style="color:#888;">Connecte-toi puis clique sur « Rafraîchir la liste ».</td></tr>
+    </tbody>
+  </table>
+
+  <script>
+    const msg = document.getElementById('msg');
+
+    function afficherMsg(data, status) {
+      msg.style.display = 'block';
+      msg.className = data.success ? 'ok' : 'ko';
+      msg.textContent = (data.success ? '✅ ' : '❌ ') + data.message + ' (HTTP ' + status + ')';
+    }
+
+    async function api(url, method, body) {
+      const options = { method };
+      if (body) {
+        options.headers = { 'Content-Type': 'application/json' };
+        options.body = JSON.stringify(body);
+      }
+      const r = await fetch(url, options);
+      const data = await r.json();
+      return { data, status: r.status };
+    }
+
+    document.getElementById('btnLogin').addEventListener('click', async () => {
+      const { data, status } = await api('api/auth/login.php', 'POST', {
+        email: document.getElementById('email').value,
+        mot_de_passe: document.getElementById('mdp').value
+      });
+      afficherMsg(data, status);
+      if (data.success) listerEtudiants();
+    });
+
+    document.getElementById('btnCreate').addEventListener('click', async () => {
+      const { data, status } = await api('api/etudiants/create.php', 'POST', {
+        nom: document.getElementById('c_nom').value,
+        prenom: document.getElementById('c_prenom').value,
+        email: document.getElementById('c_email').value,
+        filiere: document.getElementById('c_filiere').value,
+        niveau: document.getElementById('c_niveau').value
+      });
+      afficherMsg(data, status);
+      if (data.success) {
+        ['c_nom','c_prenom','c_email','c_filiere','c_niveau'].forEach(id => document.getElementById(id).value = '');
+        listerEtudiants();
+      }
+    });
+
+    document.getElementById('btnList').addEventListener('click', listerEtudiants);
+
+    async function listerEtudiants() {
+      const { data, status } = await api('api/etudiants/list.php', 'GET');
+      afficherMsg(data, status);
+      const tbody = document.getElementById('tbody');
+      if (!data.success) {
+        tbody.innerHTML = '<tr><td colspan="8" style="color:#991b1b;">' + data.message + '</td></tr>';
+        return;
+      }
+      if (data.data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="color:#888;">Aucun étudiant.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = data.data.map(e => `
+        <tr>
+          <td>${e.id_etudiant}</td>
+          <td>${e.num_etudiant}</td>
+          <td>${e.nom}</td>
+          <td>${e.prenom}</td>
+          <td>${e.email}</td>
+          <td>${e.filiere ?? ''}</td>
+          <td>${e.niveau ?? ''}</td>
+          <td><button class="b-red" onclick="supprimer(${e.id_etudiant})">Supprimer</button></td>
+        </tr>
+      `).join('');
+    }
+
+    async function supprimer(id) {
+      if (!confirm('Supprimer cet étudiant ?')) return;
+      const { data, status } = await api('api/etudiants/delete.php', 'POST', { id_etudiant: id });
+      afficherMsg(data, status);
+      listerEtudiants();
+    }
+  </script>
+</body>
+</html>
