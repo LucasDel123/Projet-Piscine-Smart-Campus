@@ -1,5 +1,5 @@
 <?php
-require_once '../../config/cors.php';
+require_once 'bakend/config_cors.php';
 require_once '../../utils/response.php';
 require_once '../../classes/Database.php';
 
