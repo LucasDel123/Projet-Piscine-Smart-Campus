@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartCampus</title>
+
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Lexend:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --ink:#0b1220; --ink-soft:#1e293b; --primary:#0d9488; --primary-d:#0f766e; --primary-l:#5eead4;
+      --accent:#f59e0b; --bg:#f4f6f8; --surface:#ffffff; --line:#e6eaef; --text:#1a2230; --muted:#64748b;
+      --danger:#dc2626; --radius:14px; --shadow:0 1px 2px rgba(16,24,40,.04),0 8px 24px rgba(16,24,40,.06);
+    }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:"Lexend",sans-serif; background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased; }
+    h1,h2,h3,h4 { font-family:"Sora",sans-serif; margin:0; letter-spacing:-.01em; }
+    button { font-family:inherit; cursor:pointer; }
+    input,select { font-family:inherit; }
+
+    .login-wrap { min-height:100vh; display:grid; place-items:center; padding:24px;
+      background:radial-gradient(900px 500px at 85% -10%, rgba(13,148,136,.18), transparent 60%),
+                 radial-gradient(700px 500px at -10% 110%, rgba(245,158,11,.12), transparent 55%), var(--ink); }
+    .login-card { width:100%; max-width:410px; background:var(--surface); border-radius:20px; padding:40px 36px;
+      box-shadow:0 30px 60px rgba(0,0,0,.35); animation:rise .6s cubic-bezier(.2,.8,.2,1) both; }
+    @keyframes rise { from{opacity:0;transform:translateY(18px);} to{opacity:1;transform:none;} }
+    .brand { display:flex; align-items:center; gap:11px; margin-bottom:26px; }
+    .brand-logo { width:42px; height:42px; border-radius:12px; display:grid; place-items:center;
+      background:linear-gradient(135deg,var(--primary),var(--primary-d)); color:#fff; font-family:"Sora"; font-weight:800; font-size:20px; box-shadow:0 6px 16px rgba(13,148,136,.4); }
+    .brand-name { font-family:"Sora"; font-weight:800; font-size:20px; color:var(--ink); }
+    .brand-name span { color:var(--primary); }
+    .login-card h2 { font-size:1.05rem; color:var(--ink); }
+    .login-card p.hint { color:var(--muted); font-size:.85rem; margin:4px 0 22px; }
+    .field { margin-bottom:16px; }
+    .field label { display:block; font-size:.8rem; font-weight:600; color:var(--ink-soft); margin-bottom:6px; }
+    .field input, .field select { width:100%; padding:12px 14px; border:1.5px solid var(--line); border-radius:11px; font-size:.95rem; transition:border-color .15s,box-shadow .15s; background:#fbfcfd; }
+    .field input:focus, .field select:focus { outline:none; border-color:var(--primary); box-shadow:0 0 0 4px rgba(13,148,136,.12); background:#fff; }
+    .btn-primary { width:100%; padding:13px; border:none; border-radius:11px; color:#fff; font-weight:600; font-size:.97rem;
+      background:linear-gradient(135deg,var(--primary),var(--primary-d)); box-shadow:0 8px 18px rgba(13,148,136,.32); transition:transform .12s,box-shadow .12s; }
+    .btn-primary:hover { transform:translateY(-1px); box-shadow:0 12px 24px rgba(13,148,136,.4); }
+    .btn-primary:disabled { opacity:.6; cursor:not-allowed; transform:none; }
+    .alert { padding:10px 13px; border-radius:10px; font-size:.85rem; margin-bottom:16px; }
+    .alert-err { background:#fef2f2; color:#991b1b; border:1px solid #fecaca; }
+    .test-note { margin-top:20px; padding-top:16px; border-top:1px solid var(--line); font-size:.76rem; color:var(--muted); line-height:1.6; }
+
+    .shell { display:flex; min-height:100vh; }
+    .sidebar { width:248px; flex-shrink:0; background:var(--ink); color:#cbd5e1; display:flex; flex-direction:column; padding:22px 16px; position:sticky; top:0; height:100vh; }
+    .sidebar .brand { margin:6px 8px 28px; }
+    .sidebar .brand-name { color:#fff; }
+    .nav-label { font-size:.7rem; text-transform:uppercase; letter-spacing:.08em; color:#64748b; margin:8px 12px; font-weight:600; }
+    .nav-item { display:flex; align-items:center; gap:12px; width:100%; text-align:left; padding:11px 13px; border:none; background:transparent; color:#94a3b8; border-radius:10px; font-size:.92rem; margin-bottom:3px; transition:all .14s; }
+    .nav-item:hover { background:rgba(255,255,255,.06); color:#e2e8f0; }
+    .nav-item.active { background:linear-gradient(135deg,var(--primary),var(--primary-d)); color:#fff; box-shadow:0 6px 14px rgba(13,148,136,.3); }
+    .nav-item .ico { font-size:1.05rem; width:20px; text-align:center; }
+    .sidebar-foot { margin-top:auto; font-size:.72rem; color:#475569; padding:12px; }
+
+    .main { flex:1; display:flex; flex-direction:column; min-width:0; }
+    .topbar { height:70px; background:var(--surface); border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; padding:0 30px; position:sticky; top:0; z-index:5; }
+    .topbar h1 { font-size:1.15rem; color:var(--ink); }
+    .user-chip { display:flex; align-items:center; gap:13px; }
+    .avatar { width:40px; height:40px; border-radius:50%; display:grid; place-items:center; background:linear-gradient(135deg,var(--primary-l),var(--primary)); color:var(--ink); font-family:"Sora"; font-weight:700; font-size:.9rem; }
+    .user-meta { text-align:right; line-height:1.25; }
+    .user-meta .nm { font-weight:600; font-size:.9rem; color:var(--ink); }
+    .badge { font-size:.68rem; padding:2px 9px; border-radius:99px; font-weight:600; background:rgba(13,148,136,.12); color:var(--primary-d); }
+    .badge.admin { background:rgba(245,158,11,.15); color:#b45309; }
+    .btn-ghost { border:1.5px solid var(--line); background:#fff; color:var(--ink-soft); padding:9px 15px; border-radius:10px; font-size:.85rem; font-weight:500; transition:all .14s; }
+    .btn-ghost:hover { border-color:#cbd5e1; background:#f8fafc; }
+
+    .content { padding:30px; flex:1; animation:fade .35s ease both; }
+    @keyframes fade { from{opacity:0;transform:translateY(8px);} to{opacity:1;transform:none;} }
+
+    .stat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:18px; margin-bottom:28px; }
+    .stat { background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:22px; box-shadow:var(--shadow); position:relative; overflow:hidden; }
+    .stat::after { content:""; position:absolute; right:-20px; top:-20px; width:90px; height:90px; border-radius:50%; background:rgba(13,148,136,.07); }
+    .stat .lab { font-size:.82rem; color:var(--muted); margin-bottom:8px; }
+    .stat .val { font-family:"Sora"; font-weight:800; font-size:2.1rem; color:var(--ink); }
+    .stat .ico { font-size:1.3rem; margin-bottom:10px; display:block; }
+
+    .panel { background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; }
+    .panel-head { padding:18px 22px; border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; }
+    .panel-head h3 { font-size:1.02rem; color:var(--ink); }
+    .panel-head .sub { font-size:.82rem; color:var(--muted); margin-top:2px; }
+    .toolbar { display:flex; gap:10px; align-items:center; }
+    .search { padding:9px 13px; border:1.5px solid var(--line); border-radius:10px; font-size:.88rem; width:230px; background:#fbfcfd; }
+    .search:focus { outline:none; border-color:var(--primary); background:#fff; }
+    .btn-add { background:linear-gradient(135deg,var(--primary),var(--primary-d)); color:#fff; border:none; padding:10px 16px; border-radius:10px; font-size:.88rem; font-weight:600; white-space:nowrap; box-shadow:0 6px 14px rgba(13,148,136,.28); }
+
+    table { width:100%; border-collapse:collapse; }
+    thead th { text-align:left; font-size:.74rem; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); padding:13px 22px; background:#fafbfc; border-bottom:1px solid var(--line); }
+    tbody td { padding:14px 22px; border-bottom:1px solid #f1f4f7; font-size:.9rem; }
+    tbody tr:last-child td { border-bottom:none; }
+    tbody tr:hover { background:#fafdfc; }
+    .pill { font-size:.74rem; padding:3px 10px; border-radius:99px; background:#eef2f6; color:#475569; }
+    .tag-ok { font-size:.74rem; padding:3px 10px; border-radius:99px; background:rgba(13,148,136,.12); color:var(--primary-d); font-weight:600; }
+    .tag-wait { font-size:.74rem; padding:3px 10px; border-radius:99px; background:rgba(245,158,11,.15); color:#b45309; font-weight:600; }
+    .row-actions { display:flex; gap:8px; }
+    .ic-btn { border:none; background:#f1f5f9; width:32px; height:32px; border-radius:8px; font-size:.85rem; transition:all .14s; }
+    .ic-btn:hover { background:#e2e8f0; }
+    .ic-btn.del:hover { background:#fee2e2; }
+    .empty { padding:50px; text-align:center; color:var(--muted); font-size:.9rem; }
+
+    .overlay { position:fixed; inset:0; background:rgba(11,18,32,.55); display:grid; place-items:center; z-index:50; padding:20px; animation:fade .2s; }
+    .modal { background:#fff; border-radius:18px; width:100%; max-width:480px; box-shadow:0 30px 60px rgba(0,0,0,.3); animation:rise .3s both; }
+    .modal-head { padding:20px 24px; border-bottom:1px solid var(--line); }
+    .modal-head h3 { font-size:1.05rem; color:var(--ink); }
+    .modal-body { padding:22px 24px; max-height:70vh; overflow:auto; }
+    .modal-body .field { margin-bottom:14px; }
+    .modal-foot { padding:16px 24px; border-top:1px solid var(--line); display:flex; gap:10px; justify-content:flex-end; }
+    .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+
+    .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); padding:12px 22px; border-radius:12px; color:#fff; font-size:.88rem; font-weight:500; box-shadow:0 12px 30px rgba(0,0,0,.25); z-index:80; animation:rise .3s; max-width:90%; }
+    .toast.ok { background:var(--primary-d); }
+    .toast.err { background:var(--danger); }
+
+    .spinner-wrap { min-height:100vh; display:grid; place-items:center; background:var(--bg); }
+    .spinner { width:38px; height:38px; border:3px solid #d6e0e6; border-top-color:var(--primary); border-radius:50%; animation:spin .8s linear infinite; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+
+    @media (max-width:720px) { .sidebar { display:none; } .form-grid { grid-template-columns:1fr; } .search { width:150px; } }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useCallback } = React;
+    const API = '/smartcampus/backend/';
+
+    async function apiCall(path, { method='GET', body } = {}) {
+      const opts = { method, headers:{} };
+      if (body) { opts.headers['Content-Type']='application/json'; opts.body=JSON.stringify(body); }
+      const res = await fetch(API + path, opts);
+      let data = {};
+      try { data = await res.json(); } catch(e) { data = { success:false, message:'Réponse invalide du serveur.' }; }
+      return { status:res.status, ...data };
+    }
+
+    const ROLE_LABEL = { administrateur:'Administrateur', enseignant:'Enseignant', etudiant:'Étudiant' };
+    const initiales = (u) => ((u.prenom?.[0]||'')+(u.nom?.[0]||'')).toUpperCase();
+
+    function Login({ onLogin }) {
+      const [email,setEmail]=useState('lucas.delliste@edu.ece.fr');
+      const [mdp,setMdp]=useState('mateolpb');
+      const [err,setErr]=useState(''); const [busy,setBusy]=useState(false);
+      const submit=async()=>{ setErr(''); setBusy(true);
+        const r=await apiCall('api/auth/login.php',{method:'POST',body:{email,mot_de_passe:mdp}});
+        setBusy(false); if(r.success) onLogin(r.data); else setErr(r.message||'Connexion impossible.'); };
+      return (
+        <div className="login-wrap"><div className="login-card">
+          <div className="brand"><div className="brand-logo">S</div><div className="brand-name">Smart<span>Campus</span></div></div>
+          <h2>Connexion à votre espace</h2>
+          <p className="hint">Gestion académique — accédez à votre tableau de bord.</p>
+          {err && <div className="alert alert-err">{err}</div>}
+          <div className="field"><label>Adresse email</label>
+            <input type="email" value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==='Enter'&&submit()} /></div>
+          <div className="field"><label>Mot de passe</label>
+            <input type="password" value={mdp} onChange={e=>setMdp(e.target.value)} onKeyDown={e=>e.key==='Enter'&&submit()} /></div>
+          <button className="btn-primary" onClick={submit} disabled={busy}>{busy?'Connexion…':'Se connecter'}</button>
+          <div className="test-note">💡 Compte de démo : <b>lucas.delliste@edu.ece.fr</b> (admin) — mot de passe <b>mateolpb</b>.</div>
+        </div></div>
+      );
+    }
+
+    function Dashboard({ user }) {
+      const [nb,setNb]=useState({etu:null,ens:null,cours:null,insc:null,notes:null});
+      useEffect(()=>{ if(user.role==='administrateur'){
+        apiCall('api/etudiants/list.php').then(r=>{ if(r.success) setNb(s=>({...s,etu:r.data.length})); });
+        apiCall('api/enseignants/list.php').then(r=>{ if(r.success) setNb(s=>({...s,ens:r.data.length})); });
+        apiCall('api/cours/list.php').then(r=>{ if(r.success) setNb(s=>({...s,cours:r.data.length})); });
+        apiCall('api/inscriptions/list.php').then(r=>{ if(r.success) setNb(s=>({...s,insc:r.data.length})); });
+        apiCall('api/notes/list.php').then(r=>{ if(r.success) setNb(s=>({...s,notes:r.data.length})); });
+      }},[]);
+      return (
+        <div>
+          <h2 style={{fontSize:'1.4rem',color:'var(--ink)',marginBottom:6}}>Bonjour {user.prenom} 👋</h2>
+          <p style={{color:'var(--muted)',marginBottom:26}}>Bienvenue sur votre espace {ROLE_LABEL[user.role]?.toLowerCase()}.</p>
+          {user.role==='administrateur' && (
+            <div className="stat-grid">
+              <div className="stat"><span className="ico">👥</span><div className="lab">Étudiants</div><div className="val">{nb.etu===null?'…':nb.etu}</div></div>
+              <div className="stat"><span className="ico">🎓</span><div className="lab">Enseignants</div><div className="val">{nb.ens===null?'…':nb.ens}</div></div>
+              <div className="stat"><span className="ico">📚</span><div className="lab">Cours</div><div className="val">{nb.cours===null?'…':nb.cours}</div></div>
+              <div className="stat"><span className="ico">📝</span><div className="lab">Inscriptions</div><div className="val">{nb.insc===null?'…':nb.insc}</div></div>
+              <div className="stat"><span className="ico">🏆</span><div className="lab">Notes saisies</div><div className="val">{nb.notes===null?'…':nb.notes}</div></div>
+            </div>
+          )}
+          <div className="panel">
+            <div className="panel-head"><div><h3>Activité</h3><div className="sub">Vue d'ensemble de votre compte</div></div></div>
+            <div style={{padding:'22px'}}>
+              <p style={{color:'var(--muted)',fontSize:'.92rem',lineHeight:1.7,margin:0}}>
+                Vous êtes connecté en tant que <b style={{color:'var(--ink)'}}>{user.prenom} {user.nom}</b> ({user.email}).
+                {user.role==='administrateur' ? ' Utilisez le menu de gauche pour gérer toute la plateforme académique.' : ' D\'autres modules seront accessibles selon votre rôle.'}
+              </p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function CrudTable({ config, notify, selectOptions={} }) {
+      const [liste,setListe]=useState([]); const [loading,setLoading]=useState(true);
+      const [q,setQ]=useState(''); const [modal,setModal]=useState(null);
+      const charger=useCallback(async()=>{ setLoading(true);
+        const r=await apiCall(config.api+'list.php'); setLoading(false);
+        if(r.success) setListe(r.data); else notify(r.message,false);
+      },[config.api]);
+      useEffect(()=>{ charger(); },[config.api]);
+      const labelOf=(it)=> config.itemLabel ? config.itemLabel(it) : `${it.prenom||''} ${it.nom||''}`;
+      const supprimer=async(item)=>{
+        if(!confirm(`${config.deleteVerb||'Supprimer'} « ${labelOf(item)} » ?`)) return;
+        const r=await apiCall(config.api+'delete.php',{method:'POST',body:{[config.idKey]:item[config.idKey]}});
+        notify(r.message,r.success); if(r.success) charger();
+      };
+      const doAction=async(a,item)=>{
+        const c = a.confirm ? a.confirm(item) : null;
+        if(c && !confirm(c)) return;
+        const r=await apiCall(config.api+a.endpoint,{method:'POST',body:a.body(item)});
+        notify(r.message,r.success); if(r.success) charger();
+      };
+      const filtres=liste.filter(it=>{ const t=config.columns.map(c=>it[c.key]||'').join(' ').toLowerCase(); return t.includes(q.toLowerCase()); });
+      const renderCell=(c,it)=>{
+        if(c.render) return c.render(it);
+        if(c.pill) return <span className="pill">{it[c.key]||'—'}</span>;
+        return (it[c.key]!=null&&it[c.key]!==''?it[c.key]:'—');
+      };
+      return (
+        <div>
+          <div className="panel">
+            <div className="panel-head">
+              <div><h3>{config.titre}</h3><div className="sub">{liste.length} {config.unite} au total</div></div>
+              <div className="toolbar">
+                <input className="search" placeholder="Rechercher…" value={q} onChange={e=>setQ(e.target.value)} />
+                <button className="btn-add" onClick={()=>setModal({mode:'create'})}>+ {config.addLabel||'Ajouter'}</button>
+              </div>
+            </div>
+            {loading ? <div className="empty">Chargement…</div>
+              : filtres.length===0 ? <div className="empty">Aucun résultat.</div>
+              : (
+                <table>
+                  <thead><tr>{config.columns.map(c=><th key={c.key}>{c.label}</th>)}<th></th></tr></thead>
+                  <tbody>
+                    {filtres.map(it=>(
+                      <tr key={it[config.idKey]}>
+                        {config.columns.map(c=>(<td key={c.key} style={c.style||{}}>{renderCell(c,it)}</td>))}
+                        <td><div className="row-actions">
+                          {config.extraActions && config.extraActions.map(a=>(
+                            (!a.show || a.show(it)) ? <button key={a.icon} className="ic-btn" title={a.title} onClick={()=>doAction(a,it)}>{a.icon}</button> : null
+                          ))}
+                          {!config.noEdit && (!config.canEdit || config.canEdit(it)) && <button className="ic-btn" title="Modifier" onClick={()=>setModal({mode:'edit',item:it})}>✏️</button>}
+                          {(!config.canDelete || config.canDelete(it)) && <button className="ic-btn del" title={config.deleteVerb||'Supprimer'} onClick={()=>supprimer(it)}>🗑️</button>}
+                        </div></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+          </div>
+          {modal && <CrudModal config={config} modal={modal} notify={notify} selectOptions={selectOptions}
+            onClose={()=>setModal(null)} onSaved={()=>{ setModal(null); charger(); }} />}
+        </div>
+      );
+    }
+
+    function CrudModal({ config, modal, onClose, onSaved, notify, selectOptions={} }) {
+      const edit=modal.mode==='edit'; const i0=modal.item||{};
+      const visible=config.fields.filter(x=> !(edit && x.createOnly));
+      const init={}; visible.forEach(f=>{ init[f.key]= (i0[f.key]!=null ? String(i0[f.key]) : ''); });
+      const [f,setF]=useState(init); const [busy,setBusy]=useState(false);
+      const set=(k,v)=>setF(s=>({...s,[k]:v}));
+      const submit=async()=>{ setBusy(true);
+        const path=config.api+(edit?'update.php':'create.php');
+        const body=edit?{...f,[config.idKey]:i0[config.idKey]}:f;
+        const r=await apiCall(path,{method:'POST',body}); setBusy(false);
+        notify(r.message,r.success); if(r.success) onSaved();
+      };
+      const renderField=(x)=>(
+        <div className="field" key={x.key}>
+          <label>{x.label}</label>
+          {x.type==='select'
+            ? <select value={f[x.key]} onChange={e=>set(x.key,e.target.value)}>
+                {(selectOptions[x.key]||[]).map(o=><option key={o.value} value={o.value}>{o.label}</option>)}
+              </select>
+            : <input type={x.type||'text'} value={f[x.key]} onChange={e=>set(x.key,e.target.value)} placeholder={x.ph||''} />}
+        </div>
+      );
+      const halves=visible.filter(x=>x.half);
+      const fulls=visible.filter(x=>!x.half);
+      return (
+        <div className="overlay" onClick={onClose}>
+          <div className="modal" onClick={e=>e.stopPropagation()}>
+            <div className="modal-head"><h3>{edit?config.editTitle:config.createTitle}</h3></div>
+            <div className="modal-body">
+              {fulls.filter(x=>x.first).map(renderField)}
+              <div className="form-grid">{halves.map(renderField)}</div>
+              {fulls.filter(x=>!x.first).map(renderField)}
+              {!edit && config.passwordNote && <p style={{fontSize:'.78rem',color:'var(--muted)',margin:'2px 0 0'}}>Mot de passe par défaut : <b>smartcampus</b>.</p>}
+            </div>
+            <div className="modal-foot">
+              <button className="btn-ghost" onClick={onClose}>Annuler</button>
+              <button className="btn-add" onClick={submit} disabled={busy}>{busy?'Enregistrement…':(edit?'Enregistrer':(config.addLabel||'Ajouter'))}</button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function CoursView({ notify }) {
+      const [teachers,setTeachers]=useState([]);
+      useEffect(()=>{ apiCall('api/enseignants/list.php').then(r=>{ if(r.success) setTeachers(r.data); }); },[]);
+      const options=[{value:'',label:'— Aucun enseignant —'}].concat(teachers.map(t=>({value:String(t.id_enseignant), label:`${t.prenom} ${t.nom}`})));
+      return <CrudTable config={CONF_COURS} notify={notify} selectOptions={{id_enseignant:options}} />;
+    }
+
+    function InscriptionsView({ notify }) {
+      const [etus,setEtus]=useState([]); const [cours,setCours]=useState([]);
+      useEffect(()=>{
+        apiCall('api/etudiants/list.php').then(r=>{ if(r.success) setEtus(r.data); });
+        apiCall('api/cours/list.php').then(r=>{ if(r.success) setCours(r.data); });
+      },[]);
+      const optEtu=[{value:'',label:'— Choisir un étudiant —'}].concat(etus.map(e=>({value:String(e.id_etudiant), label:`${e.prenom} ${e.nom} (${e.num_etudiant})`})));
+      const optCours=[{value:'',label:'— Choisir un cours —'}].concat(cours.map(c=>({value:String(c.id_cours), label:`${c.code_cours} — ${c.intitule}`})));
+      return <CrudTable config={CONF_INSC} notify={notify} selectOptions={{id_etudiant:optEtu, id_cours:optCours}} />;
+    }
+
+    function NotesView({ notify }) {
+      const [insc,setInsc]=useState([]);
+      useEffect(()=>{ apiCall('api/inscriptions/list.php').then(r=>{ if(r.success) setInsc(r.data); }); },[]);
+      const optInsc=[{value:'',label:'— Choisir une inscription —'}].concat(insc.map(i=>({value:String(i.id_inscription), label:`${i.etudiant} — ${i.code_cours}`})));
+      const optType=[{value:'',label:'— Choisir —'}].concat(['CC1','CC2','DS','Examen','Projet'].map(t=>({value:t,label:t})));
+      return <CrudTable config={CONF_NOTES} notify={notify} selectOptions={{id_inscription:optInsc, type_evaluation:optType}} />;
+    }
+
+    const CONF_ETU = {
+      api:'api/etudiants/', idKey:'id_etudiant', titre:'Gestion des étudiants', unite:'étudiant(s)',
+      createTitle:'Nouvel étudiant', editTitle:"Modifier l'étudiant", passwordNote:true, itemLabel:(e)=>`${e.prenom} ${e.nom}`,
+      columns:[
+        {key:'num_etudiant',label:'N°',pill:true},{key:'nom',label:'Nom',style:{fontWeight:500}},
+        {key:'prenom',label:'Prénom'},{key:'email',label:'Email',style:{color:'var(--muted)'}},
+        {key:'filiere',label:'Filière'},{key:'niveau',label:'Niveau'}
+      ],
+      fields:[
+        {key:'nom',label:'Nom',half:true},{key:'prenom',label:'Prénom',half:true},
+        {key:'email',label:'Email',type:'email'},
+        {key:'filiere',label:'Filière',half:true,ph:'Informatique'},{key:'niveau',label:'Niveau',half:true,ph:'L2'}
+      ]
+    };
+    const CONF_ENS = {
+      api:'api/enseignants/', idKey:'id_enseignant', titre:'Gestion des enseignants', unite:'enseignant(s)',
+      createTitle:'Nouvel enseignant', editTitle:"Modifier l'enseignant", passwordNote:true, itemLabel:(e)=>`${e.prenom} ${e.nom}`,
+      columns:[
+        {key:'nom',label:'Nom',style:{fontWeight:500}},{key:'prenom',label:'Prénom'},
+        {key:'email',label:'Email',style:{color:'var(--muted)'}},
+        {key:'departement',label:'Département'},{key:'grade',label:'Grade'}
+      ],
+      fields:[
+        {key:'nom',label:'Nom',half:true},{key:'prenom',label:'Prénom',half:true},
+        {key:'email',label:'Email',type:'email'},
+        {key:'departement',label:'Département',half:true,ph:'Informatique'},{key:'grade',label:'Grade',half:true,ph:'Maître de conf.'}
+      ]
+    };
+    const CONF_COURS = {
+      api:'api/cours/', idKey:'id_cours', titre:'Gestion des cours', unite:'cours',
+      createTitle:'Nouveau cours', editTitle:'Modifier le cours', itemLabel:(c)=>c.intitule,
+      columns:[
+        {key:'code_cours',label:'Code',pill:true},{key:'intitule',label:'Intitulé',style:{fontWeight:500}},
+        {key:'semestre',label:'Semestre'},{key:'enseignant',label:'Enseignant',style:{color:'var(--muted)'}},
+        {key:'remplissage',label:'Remplissage'},{key:'credits',label:'Crédits'}
+      ],
+      fields:[
+        {key:'code_cours',label:'Code',half:true,ph:'INF301'},{key:'intitule',label:'Intitulé',half:true,ph:'Bases de données'},
+        {key:'semestre',label:'Semestre',half:true,ph:'S1'},{key:'capacite_max',label:'Capacité max',half:true,type:'number',ph:'30'},
+        {key:'credits',label:'Crédits',half:true,type:'number',ph:'3'},{key:'coefficient',label:'Coefficient',half:true,type:'number',ph:'1'},
+        {key:'id_enseignant',label:'Enseignant responsable',type:'select'}
+      ]
+    };
+    const CONF_INSC = {
+      api:'api/inscriptions/', idKey:'id_inscription', titre:'Inscriptions aux cours', unite:'inscription(s)',
+      createTitle:'Inscrire un étudiant à un cours', addLabel:'Inscrire', deleteVerb:'Désinscrire', noEdit:true,
+      itemLabel:(i)=>`${i.etudiant} → ${i.cours}`,
+      columns:[
+        {key:'etudiant',label:'Étudiant',style:{fontWeight:500}},{key:'code_cours',label:'Code',pill:true},
+        {key:'cours',label:'Cours',style:{color:'var(--muted)'}},{key:'date_inscription',label:'Date d\'inscription'}
+      ],
+      fields:[
+        {key:'id_etudiant',label:'Étudiant',type:'select'},{key:'id_cours',label:'Cours',type:'select'}
+      ]
+    };
+    const CONF_NOTES = {
+      api:'api/notes/', idKey:'id_note', titre:'Gestion des notes', unite:'note(s)',
+      createTitle:'Saisir une note', editTitle:'Modifier la note', addLabel:'Saisir une note',
+      itemLabel:(n)=>`${n.etudiant} — ${n.type_evaluation}`,
+      canEdit:(n)=> Number(n.validee)!==1,
+      canDelete:(n)=> Number(n.validee)!==1,
+      extraActions:[{icon:'🔒', title:'Valider (verrouiller)', endpoint:'validate.php', show:(n)=>Number(n.validee)!==1, body:(n)=>({id_note:n.id_note}), confirm:()=>'Valider cette note ? Elle ne pourra plus être modifiée.'}],
+      columns:[
+        {key:'etudiant',label:'Étudiant',style:{fontWeight:500}},{key:'code_cours',label:'Cours',pill:true},
+        {key:'type_evaluation',label:'Type'},{key:'valeur',label:'Note / 20',style:{fontWeight:600}},
+        {key:'coefficient',label:'Coef.'},
+        {key:'statut',label:'Statut',render:(n)=> Number(n.validee)===1 ? <span className="tag-ok">Validée</span> : <span className="tag-wait">En attente</span>}
+      ],
+      fields:[
+        {key:'id_inscription',label:'Étudiant — Cours',type:'select',first:true,createOnly:true},
+        {key:'type_evaluation',label:'Type',type:'select',half:true},
+        {key:'valeur',label:'Note (0-20)',type:'number',half:true},
+        {key:'coefficient',label:'Coefficient',type:'number'}
+      ]
+    };
+
+    function Shell({ user, onLogout }) {
+      const [view,setView]=useState('dashboard'); const [toast,setToast]=useState(null);
+      const notify=(msg,ok)=>{ setToast({msg,ok}); setTimeout(()=>setToast(null),3500); };
+      const logout=async()=>{ await apiCall('api/auth/logout.php',{method:'POST'}); onLogout(); };
+      const isAdmin=user.role==='administrateur';
+      const titres={dashboard:'Tableau de bord',etudiants:'Étudiants',enseignants:'Enseignants',cours:'Cours',inscriptions:'Inscriptions',notes:'Notes'};
+      return (
+        <div className="shell">
+          <aside className="sidebar">
+            <div className="brand"><div className="brand-logo">S</div><div className="brand-name">Smart<span style={{color:'var(--primary-l)'}}>Campus</span></div></div>
+            <div className="nav-label">Navigation</div>
+            <button className={'nav-item'+(view==='dashboard'?' active':'')} onClick={()=>setView('dashboard')}><span className="ico">📊</span> Tableau de bord</button>
+            {isAdmin && <button className={'nav-item'+(view==='etudiants'?' active':'')} onClick={()=>setView('etudiants')}><span className="ico">👥</span> Étudiants</button>}
+            {isAdmin && <button className={'nav-item'+(view==='enseignants'?' active':'')} onClick={()=>setView('enseignants')}><span className="ico">🎓</span> Enseignants</button>}
+            {isAdmin && <button className={'nav-item'+(view==='cours'?' active':'')} onClick={()=>setView('cours')}><span className="ico">📚</span> Cours</button>}
+            {isAdmin && <button className={'nav-item'+(view==='inscriptions'?' active':'')} onClick={()=>setView('inscriptions')}><span className="ico">📝</span> Inscriptions</button>}
+            {isAdmin && <button className={'nav-item'+(view==='notes'?' active':'')} onClick={()=>setView('notes')}><span className="ico">🏆</span> Notes</button>}
+            <div className="sidebar-foot">SmartCampus · 2026<br/>Projet Web dynamique — ECE</div>
+          </aside>
+          <div className="main">
+            <header className="topbar">
+              <h1>{titres[view]}</h1>
+              <div className="user-chip">
+                <div className="user-meta"><div className="nm">{user.prenom} {user.nom}</div><span className={'badge'+(isAdmin?' admin':'')}>{ROLE_LABEL[user.role]}</span></div>
+                <div className="avatar">{initiales(user)}</div>
+                <button className="btn-ghost" onClick={logout}>Déconnexion</button>
+              </div>
+            </header>
+            <main className="content" key={view}>
+              {view==='dashboard' && <Dashboard user={user} />}
+              {view==='etudiants' && isAdmin && <CrudTable config={CONF_ETU} notify={notify} />}
+              {view==='enseignants' && isAdmin && <CrudTable config={CONF_ENS} notify={notify} />}
+              {view==='cours' && isAdmin && <CoursView notify={notify} />}
+              {view==='inscriptions' && isAdmin && <InscriptionsView notify={notify} />}
+              {view==='notes' && isAdmin && <NotesView notify={notify} />}
+            </main>
+          </div>
+          {toast && <div className={'toast '+(toast.ok?'ok':'err')}>{toast.ok?'✅':'⚠️'} {toast.msg}</div>}
+        </div>
+      );
+    }
+
+    function App() {
+      const [user,setUser]=useState(null); const [loading,setLoading]=useState(true);
+      useEffect(()=>{ apiCall('api/auth/me.php').then(r=>{ if(r.success) setUser(r.data); setLoading(false); }); },[]);
+      if(loading) return <div className="spinner-wrap"><div className="spinner"></div></div>;
+      if(!user) return <Login onLogin={setUser} />;
+      return <Shell user={user} onLogout={()=>setUser(null)} />;
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
