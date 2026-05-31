@@ -27,8 +27,8 @@ CREATE TABLE etudiant (
     prenom VARCHAR(50) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
     mdp VARCHAR(255) NOT NULL,
-    filiere VARCHAR(50) NOT NULL,
     niveau VARCHAR(10) NOT NULL,
+    groupe INT NOT NULL,
     date_inscription DATE NOT NULL
 ) ENGINE=InnoDB;
 
