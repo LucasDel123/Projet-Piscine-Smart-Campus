@@ -53,7 +53,7 @@
     <input id="c_nom" placeholder="Nom">
     <input id="c_prenom" placeholder="Prénom">
     <input id="c_email" placeholder="Email">
-    <input id="c_filiere" placeholder="Filière (ex: Informatique)">
+    <input id="c_groupe" type="number" placeholder="Groupe (ex: 1)">
     <input id="c_niveau" placeholder="Niveau (ex: L2)">
   </div>
   <button class="b-teal" id="btnCreate">Ajouter</button>
@@ -63,7 +63,7 @@
   <div id="msg"></div>
   <table>
     <thead>
-      <tr><th>ID</th><th>N° étu.</th><th>Nom</th><th>Prénom</th><th>Email</th><th>Filière</th><th>Niveau</th><th></th></tr>
+      <tr><th>ID</th><th>N° étu.</th><th>Nom</th><th>Prénom</th><th>Email</th><th>Niveau</th><th>Groupe</th><th></th></tr>
     </thead>
     <tbody id="tbody">
       <tr><td colspan="8" style="color:#888;">Connecte-toi puis clique sur « Rafraîchir la liste ».</td></tr>
@@ -104,12 +104,12 @@
         nom: document.getElementById('c_nom').value,
         prenom: document.getElementById('c_prenom').value,
         email: document.getElementById('c_email').value,
-        filiere: document.getElementById('c_filiere').value,
-        niveau: document.getElementById('c_niveau').value
+        niveau: document.getElementById('c_niveau').value,
+        groupe: Number(document.getElementById('c_groupe').value)
       });
       afficherMsg(data, status);
       if (data.success) {
-        ['c_nom','c_prenom','c_email','c_filiere','c_niveau'].forEach(id => document.getElementById(id).value = '');
+        ['c_nom','c_prenom','c_email','c_niveau','c_groupe'].forEach(id => document.getElementById(id).value = '');
         listerEtudiants();
       }
     });
@@ -135,8 +135,8 @@
           <td>${e.nom}</td>
           <td>${e.prenom}</td>
           <td>${e.email}</td>
-          <td>${e.filiere ?? ''}</td>
           <td>${e.niveau ?? ''}</td>
+          <td>${e.groupe ?? ''}</td>
           <td><button class="b-red" onclick="supprimer(${e.id_etudiant})">Supprimer</button></td>
         </tr>
       `).join('');
