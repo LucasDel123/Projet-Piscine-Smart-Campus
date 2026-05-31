@@ -16,8 +16,8 @@ $nom        = trim($input['nom'] ?? '');
 $prenom     = trim($input['prenom'] ?? '');
 $email      = trim($input['email'] ?? '');
 $motDePasse = $input['mot_de_passe'] ?? 'smartcampus';
-$filiere    = trim($input['filiere'] ?? 'Non définie');
-$niveau     = trim($input['niveau'] ?? 'L1');
+$niveau     = trim($input['niveau'] ?? 'ING1');
+$groupe     = (int) ($input['groupe'] ?? 1);
 $numEtu     = trim($input['num_etudiant'] ?? '');
 
 if ($nom === '' || $prenom === '' || $email === '') {
@@ -28,6 +28,10 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     jsonError('Le format de l\'email est invalide.', 400);
 }
 
+if ($groupe <= 0) {
+    jsonError('Le groupe doit être un entier positif.', 400);
+}
+
 if ($numEtu === '') {
     $numEtu = 'E' . date('Y') . rand(1000, 9999);
 }
@@ -36,19 +40,19 @@ $pdo = Database::getConnection();
 
 $mdpHache = password_hash($motDePasse, PASSWORD_BCRYPT);
 
-$sql = "INSERT INTO etudiant (num_etudiant, nom, prenom, email, mdp, filiere, niveau, date_inscription)
-        VALUES (:num, :nom, :prenom, :email, :mdp, :filiere, :niveau, CURDATE())";
+$sql = "INSERT INTO etudiant (num_etudiant, nom, prenom, email, mdp, niveau, groupe, date_inscription)
+        VALUES (:num, :nom, :prenom, :email, :mdp, :niveau, :groupe, CURDATE())";
 
 try {
     $stmt = $pdo->prepare($sql);
     $stmt->execute([
-        ':num'     => $numEtu,
-        ':nom'     => $nom,
-        ':prenom'  => $prenom,
-        ':email'   => $email,
-        ':mdp'     => $mdpHache,
-        ':filiere' => $filiere,
-        ':niveau'  => $niveau,
+        ':num'    => $numEtu,
+        ':nom'    => $nom,
+        ':prenom' => $prenom,
+        ':email'  => $email,
+        ':mdp'    => $mdpHache,
+        ':niveau' => $niveau,
+        ':groupe' => $groupe,
     ]);
 
     $nouvelId = $pdo->lastInsertId();
@@ -60,8 +64,8 @@ try {
             'nom'          => $nom,
             'prenom'       => $prenom,
             'email'        => $email,
-            'filiere'      => $filiere,
             'niveau'       => $niveau,
+            'groupe'       => $groupe,
         ],
         'Étudiant ajouté avec succès.',
         201
