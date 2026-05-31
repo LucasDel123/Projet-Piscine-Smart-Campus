@@ -26,11 +26,11 @@ if (!$stmt->fetch()) {
     jsonError('Étudiant introuvable.', 404);
 }
 
-$nom     = trim($input['nom'] ?? '');
-$prenom  = trim($input['prenom'] ?? '');
-$email   = trim($input['email'] ?? '');
-$filiere = trim($input['filiere'] ?? '');
-$niveau  = trim($input['niveau'] ?? '');
+$nom    = trim($input['nom'] ?? '');
+$prenom = trim($input['prenom'] ?? '');
+$email  = trim($input['email'] ?? '');
+$niveau = trim($input['niveau'] ?? '');
+$groupe = (int) ($input['groupe'] ?? 0);
 
 if ($nom === '' || $prenom === '' || $email === '') {
     jsonError('Le nom, le prénom et l\'email sont obligatoires.', 400);
@@ -40,19 +40,23 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     jsonError('Le format de l\'email est invalide.', 400);
 }
 
+if ($groupe <= 0) {
+    jsonError('Le groupe doit être un entier positif.', 400);
+}
+
 $sql = "UPDATE etudiant
-        SET nom = :nom, prenom = :prenom, email = :email, filiere = :filiere, niveau = :niveau
+        SET nom = :nom, prenom = :prenom, email = :email, niveau = :niveau, groupe = :groupe
         WHERE id_etudiant = :id";
 
 try {
     $stmt = $pdo->prepare($sql);
     $stmt->execute([
-        ':nom'     => $nom,
-        ':prenom'  => $prenom,
-        ':email'   => $email,
-        ':filiere' => $filiere,
-        ':niveau'  => $niveau,
-        ':id'      => $id,
+        ':nom'    => $nom,
+        ':prenom' => $prenom,
+        ':email'  => $email,
+        ':niveau' => $niveau,
+        ':groupe' => $groupe,
+        ':id'     => $id,
     ]);
 
     jsonSuccess(
@@ -61,8 +65,8 @@ try {
             'nom'         => $nom,
             'prenom'      => $prenom,
             'email'       => $email,
-            'filiere'     => $filiere,
             'niveau'      => $niveau,
+            'groupe'      => $groupe,
         ],
         'Étudiant modifié avec succès.'
     );
