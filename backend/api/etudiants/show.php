@@ -14,7 +14,7 @@ if ($id <= 0) {
 
 $pdo = Database::getConnection();
 
-$sql = "SELECT id_etudiant, num_etudiant, nom, prenom, email, filiere, niveau, date_inscription
+$sql = "SELECT id_etudiant, num_etudiant, nom, prenom, email, niveau, groupe, date_inscription
         FROM etudiant
         WHERE id_etudiant = :id
         LIMIT 1";
