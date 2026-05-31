@@ -34,10 +34,22 @@ if (!in_array($type, $typesValides, true)) {
 
 $pdo = Database::getConnection();
 
-$stmt = $pdo->prepare("SELECT id_inscription FROM inscription WHERE id_inscription = :id");
+$stmt = $pdo->prepare(
+    "SELECT c.id_enseignant
+     FROM inscription i
+     JOIN cours c ON c.id_cours = i.id_cours
+     WHERE i.id_inscription = :id"
+);
 $stmt->execute([':id' => $idInsc]);
-if (!$stmt->fetch()) {
+$inscription = $stmt->fetch();
+if (!$inscription) {
     jsonError('Inscription introuvable.', 404);
+}
+
+$utilisateur = Auth::user();
+if ($utilisateur['role'] === 'enseignant'
+    && (int) $inscription['id_enseignant'] !== (int) $utilisateur['id']) {
+    jsonError('Vous ne pouvez saisir une note que pour un cours que vous enseignez.', 403);
 }
 
 $sql = "INSERT INTO note (valeur, type_evaluation, coefficient, date_saisie, id_inscription)
