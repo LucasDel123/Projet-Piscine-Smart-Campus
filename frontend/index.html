@@ -15,7 +15,7 @@
 
   <style>
     :root {
-      --ink:#0b1220; --ink-soft:#1e293b; --primary:#0d9488; --primary-d:#0f766e; --primary-l:#5eead4;
+      --ink:#0b1220; --ink-soft:#1e293b; --primary:#1e40af; --primary-d:#1e3a8a; --primary-l:#93c5fd;
       --accent:#f59e0b; --bg:#f4f6f8; --surface:#ffffff; --line:#e6eaef; --text:#1a2230; --muted:#64748b;
       --danger:#dc2626; --radius:14px; --shadow:0 1px 2px rgba(16,24,40,.04),0 8px 24px rgba(16,24,40,.06);
     }
@@ -26,14 +26,14 @@
     input,select { font-family:inherit; }
 
     .login-wrap { min-height:100vh; display:grid; place-items:center; padding:24px;
-      background:radial-gradient(900px 500px at 85% -10%, rgba(13,148,136,.18), transparent 60%),
+      background:radial-gradient(900px 500px at 85% -10%, rgba(30,64,175,.18), transparent 60%),
                  radial-gradient(700px 500px at -10% 110%, rgba(245,158,11,.12), transparent 55%), var(--ink); }
     .login-card { width:100%; max-width:410px; background:var(--surface); border-radius:20px; padding:40px 36px;
       box-shadow:0 30px 60px rgba(0,0,0,.35); animation:rise .6s cubic-bezier(.2,.8,.2,1) both; }
     @keyframes rise { from{opacity:0;transform:translateY(18px);} to{opacity:1;transform:none;} }
     .brand { display:flex; align-items:center; gap:11px; margin-bottom:26px; }
     .brand-logo { width:42px; height:42px; border-radius:12px; display:grid; place-items:center;
-      background:linear-gradient(135deg,var(--primary),var(--primary-d)); color:#fff; font-family:"Sora"; font-weight:800; font-size:20px; box-shadow:0 6px 16px rgba(13,148,136,.4); }
+      background:linear-gradient(135deg,var(--primary),var(--primary-d)); color:#fff; font-family:"Sora"; font-weight:800; font-size:20px; box-shadow:0 6px 16px rgba(30,64,175,.4); }
     .brand-name { font-family:"Sora"; font-weight:800; font-size:20px; color:var(--ink); }
     .brand-name span { color:var(--primary); }
     .login-card h2 { font-size:1.05rem; color:var(--ink); }
@@ -41,10 +41,10 @@
     .field { margin-bottom:16px; }
     .field label { display:block; font-size:.8rem; font-weight:600; color:var(--ink-soft); margin-bottom:6px; }
     .field input, .field select { width:100%; padding:12px 14px; border:1.5px solid var(--line); border-radius:11px; font-size:.95rem; transition:border-color .15s,box-shadow .15s; background:#fbfcfd; }
-    .field input:focus, .field select:focus { outline:none; border-color:var(--primary); box-shadow:0 0 0 4px rgba(13,148,136,.12); background:#fff; }
+    .field input:focus, .field select:focus { outline:none; border-color:var(--primary); box-shadow:0 0 0 4px rgba(30,64,175,.12); background:#fff; }
     .btn-primary { width:100%; padding:13px; border:none; border-radius:11px; color:#fff; font-weight:600; font-size:.97rem;
-      background:linear-gradient(135deg,var(--primary),var(--primary-d)); box-shadow:0 8px 18px rgba(13,148,136,.32); transition:transform .12s,box-shadow .12s; }
-    .btn-primary:hover { transform:translateY(-1px); box-shadow:0 12px 24px rgba(13,148,136,.4); }
+      background:linear-gradient(135deg,var(--primary),var(--primary-d)); box-shadow:0 8px 18px rgba(30,64,175,.32); transition:transform .12s,box-shadow .12s; }
+    .btn-primary:hover { transform:translateY(-1px); box-shadow:0 12px 24px rgba(30,64,175,.4); }
     .btn-primary:disabled { opacity:.6; cursor:not-allowed; transform:none; }
     .alert { padding:10px 13px; border-radius:10px; font-size:.85rem; margin-bottom:16px; }
     .alert-err { background:#fef2f2; color:#991b1b; border:1px solid #fecaca; }
@@ -57,7 +57,7 @@
     .nav-label { font-size:.7rem; text-transform:uppercase; letter-spacing:.08em; color:#64748b; margin:8px 12px; font-weight:600; }
     .nav-item { display:flex; align-items:center; gap:12px; width:100%; text-align:left; padding:11px 13px; border:none; background:transparent; color:#94a3b8; border-radius:10px; font-size:.92rem; margin-bottom:3px; transition:all .14s; }
     .nav-item:hover { background:rgba(255,255,255,.06); color:#e2e8f0; }
-    .nav-item.active { background:linear-gradient(135deg,var(--primary),var(--primary-d)); color:#fff; box-shadow:0 6px 14px rgba(13,148,136,.3); }
+    .nav-item.active { background:linear-gradient(135deg,var(--primary),var(--primary-d)); color:#fff; box-shadow:0 6px 14px rgba(30,64,175,.3); }
     .nav-item .ico { font-size:1.05rem; width:20px; text-align:center; }
     .sidebar-foot { margin-top:auto; font-size:.72rem; color:#475569; padding:12px; }
 
@@ -68,7 +68,7 @@
     .avatar { width:40px; height:40px; border-radius:50%; display:grid; place-items:center; background:linear-gradient(135deg,var(--primary-l),var(--primary)); color:var(--ink); font-family:"Sora"; font-weight:700; font-size:.9rem; }
     .user-meta { text-align:right; line-height:1.25; }
     .user-meta .nm { font-weight:600; font-size:.9rem; color:var(--ink); }
-    .badge { font-size:.68rem; padding:2px 9px; border-radius:99px; font-weight:600; background:rgba(13,148,136,.12); color:var(--primary-d); }
+    .badge { font-size:.68rem; padding:2px 9px; border-radius:99px; font-weight:600; background:rgba(30,64,175,.12); color:var(--primary-d); }
     .badge.admin { background:rgba(245,158,11,.15); color:#b45309; }
     .btn-ghost { border:1.5px solid var(--line); background:#fff; color:var(--ink-soft); padding:9px 15px; border-radius:10px; font-size:.85rem; font-weight:500; transition:all .14s; }
     .btn-ghost:hover { border-color:#cbd5e1; background:#f8fafc; }
@@ -78,7 +78,7 @@
 
     .stat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:18px; margin-bottom:28px; }
     .stat { background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:22px; box-shadow:var(--shadow); position:relative; overflow:hidden; }
-    .stat::after { content:""; position:absolute; right:-20px; top:-20px; width:90px; height:90px; border-radius:50%; background:rgba(13,148,136,.07); }
+    .stat::after { content:""; position:absolute; right:-20px; top:-20px; width:90px; height:90px; border-radius:50%; background:rgba(30,64,175,.07); }
     .stat .lab { font-size:.82rem; color:var(--muted); margin-bottom:8px; }
     .stat .val { font-family:"Sora"; font-weight:800; font-size:2.1rem; color:var(--ink); }
     .stat .ico { font-size:1.3rem; margin-bottom:10px; display:block; }
@@ -90,7 +90,7 @@
     .toolbar { display:flex; gap:10px; align-items:center; }
     .search { padding:9px 13px; border:1.5px solid var(--line); border-radius:10px; font-size:.88rem; width:230px; background:#fbfcfd; }
     .search:focus { outline:none; border-color:var(--primary); background:#fff; }
-    .btn-add { background:linear-gradient(135deg,var(--primary),var(--primary-d)); color:#fff; border:none; padding:10px 16px; border-radius:10px; font-size:.88rem; font-weight:600; white-space:nowrap; box-shadow:0 6px 14px rgba(13,148,136,.28); }
+    .btn-add { background:linear-gradient(135deg,var(--primary),var(--primary-d)); color:#fff; border:none; padding:10px 16px; border-radius:10px; font-size:.88rem; font-weight:600; white-space:nowrap; box-shadow:0 6px 14px rgba(30,64,175,.28); }
 
     table { width:100%; border-collapse:collapse; }
     thead th { text-align:left; font-size:.74rem; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); padding:13px 22px; background:#fafbfc; border-bottom:1px solid var(--line); }
@@ -98,7 +98,7 @@
     tbody tr:last-child td { border-bottom:none; }
     tbody tr:hover { background:#fafdfc; }
     .pill { font-size:.74rem; padding:3px 10px; border-radius:99px; background:#eef2f6; color:#475569; }
-    .tag-ok { font-size:.74rem; padding:3px 10px; border-radius:99px; background:rgba(13,148,136,.12); color:var(--primary-d); font-weight:600; }
+    .tag-ok { font-size:.74rem; padding:3px 10px; border-radius:99px; background:rgba(30,64,175,.12); color:var(--primary-d); font-weight:600; }
     .tag-wait { font-size:.74rem; padding:3px 10px; border-radius:99px; background:rgba(245,158,11,.15); color:#b45309; font-weight:600; }
     .row-actions { display:flex; gap:8px; }
     .ic-btn { border:none; background:#f1f5f9; width:32px; height:32px; border-radius:8px; font-size:.85rem; transition:all .14s; }
@@ -321,13 +321,42 @@
 
     function InscriptionsView({ notify }) {
       const [etus,setEtus]=useState([]); const [cours,setCours]=useState([]);
+      const [niveau,setNiveau]=useState(''); const [groupe,setGroupe]=useState(''); const [coursGrp,setCoursGrp]=useState('');
+      const [busy,setBusy]=useState(false); const [tick,setTick]=useState(0);
       useEffect(()=>{
         apiCall('api/etudiants/list.php').then(r=>{ if(r.success) setEtus(r.data); });
         apiCall('api/cours/list.php').then(r=>{ if(r.success) setCours(r.data); });
       },[]);
       const optEtu=[{value:'',label:'— Choisir un étudiant —'}].concat(etus.map(e=>({value:String(e.id_etudiant), label:`${e.prenom} ${e.nom} (${e.num_etudiant})`})));
       const optCours=[{value:'',label:'— Choisir un cours —'}].concat(cours.map(c=>({value:String(c.id_cours), label:`${c.code_cours} — ${c.intitule}`})));
-      return <CrudTable config={CONF_INSC} notify={notify} selectOptions={{id_etudiant:optEtu, id_cours:optCours}} />;
+      const niveaux=[...new Set(etus.map(e=>e.niveau).filter(Boolean))].sort();
+      const inscrireGroupe=async()=>{
+        if(!niveau||!groupe||!coursGrp){ notify('Choisis un niveau, un groupe et un cours.',false); return; }
+        setBusy(true);
+        const r=await apiCall('api/inscriptions/create_groupe.php',{method:'POST',body:{niveau,groupe:Number(groupe),id_cours:Number(coursGrp)}});
+        setBusy(false); notify(r.message,r.success);
+        if(r.success){ setGroupe(''); setTick(t=>t+1); }
+      };
+      return (
+        <div>
+          <div className="panel" style={{marginBottom:22}}>
+            <div className="panel-head"><div><h3>Inscription d'une classe entière</h3><div className="sub">Inscrit tous les étudiants d'un niveau + groupe à un cours, avec contrôle de capacité</div></div></div>
+            <div style={{padding:22,display:'grid',gridTemplateColumns:'1fr 1fr 2fr auto',gap:12,alignItems:'end'}}>
+              <div className="field" style={{marginBottom:0}}><label>Niveau</label>
+                <select value={niveau} onChange={e=>setNiveau(e.target.value)}>
+                  <option value="">— Niveau —</option>
+                  {niveaux.map(n=><option key={n} value={n}>{n}</option>)}
+                </select></div>
+              <div className="field" style={{marginBottom:0}}><label>Groupe</label>
+                <input type="number" min="1" value={groupe} onChange={e=>setGroupe(e.target.value)} placeholder="ex : 1" /></div>
+              <div className="field" style={{marginBottom:0}}><label>Cours</label>
+                <select value={coursGrp} onChange={e=>setCoursGrp(e.target.value)}>{optCours.map(o=><option key={o.value} value={o.value}>{o.label}</option>)}</select></div>
+              <button className="btn-add" onClick={inscrireGroupe} disabled={busy}>{busy?'Inscription…':'Inscrire la classe'}</button>
+            </div>
+          </div>
+          <CrudTable key={tick} config={CONF_INSC} notify={notify} selectOptions={{id_etudiant:optEtu, id_cours:optCours}} />
+        </div>
+      );
     }
 
     function NotesView({ notify }) {
@@ -336,6 +365,58 @@
       const optInsc=[{value:'',label:'— Choisir une inscription —'}].concat(insc.map(i=>({value:String(i.id_inscription), label:`${i.etudiant} — ${i.code_cours}`})));
       const optType=[{value:'',label:'— Choisir —'}].concat(['CC1','CC2','DS','Examen','Projet'].map(t=>({value:t,label:t})));
       return <CrudTable config={CONF_NOTES} notify={notify} selectOptions={{id_inscription:optInsc, type_evaluation:optType}} />;
+    }
+
+    function BulletinView({ notify }) {
+      const [etus,setEtus]=useState([]); const [sel,setSel]=useState('');
+      const [data,setData]=useState(null); const [loading,setLoading]=useState(false);
+      useEffect(()=>{ apiCall('api/etudiants/list.php').then(r=>{ if(r.success) setEtus(r.data); }); },[]);
+      const charger=async(id)=>{ setSel(id); setData(null); if(!id) return; setLoading(true);
+        const r=await apiCall('api/notes/bulletin.php?id_etudiant='+id); setLoading(false);
+        if(r.success) setData(r.data); else notify(r.message,false);
+      };
+      return (
+        <div className="panel">
+          <div className="panel-head">
+            <div><h3>Bulletin de notes</h3><div className="sub">Moyennes pondérées par cours et moyenne générale</div></div>
+            <div className="toolbar">
+              <select className="search" style={{width:280}} value={sel} onChange={e=>charger(e.target.value)}>
+                <option value="">— Choisir un étudiant —</option>
+                {etus.map(e=><option key={e.id_etudiant} value={String(e.id_etudiant)}>{e.prenom} {e.nom} ({e.num_etudiant})</option>)}
+              </select>
+            </div>
+          </div>
+          {loading ? <div className="empty">Chargement…</div>
+            : !data ? <div className="empty">Sélectionne un étudiant pour afficher son bulletin.</div>
+            : (
+              <div style={{padding:22}}>
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:18,flexWrap:'wrap',gap:12}}>
+                  <div style={{fontFamily:'Sora',fontWeight:700,fontSize:'1.1rem',color:'var(--ink)'}}>{data.etudiant}</div>
+                  <div style={{background:'var(--ink)',color:'#fff',padding:'8px 16px',borderRadius:12,fontFamily:'Sora',fontWeight:700}}>Moyenne générale : {data.moyenne_generale===null?'—':data.moyenne_generale} / 20</div>
+                </div>
+                {data.bulletin.length===0 ? <div className="empty">Aucune note enregistrée.</div>
+                  : <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))',gap:16}}>
+                      {data.bulletin.map(c=>(
+                        <div key={c.id_cours} style={{border:'1px solid var(--line)',borderRadius:'var(--radius)',overflow:'hidden'}}>
+                          <div style={{padding:'12px 14px',borderBottom:'1px solid var(--line)',display:'flex',justifyContent:'space-between',alignItems:'center',gap:8}}>
+                            <div><span className="pill">{c.code_cours}</span> <span style={{fontWeight:500}}>{c.intitule}</span></div>
+                            <span className="tag-ok">{c.moyenne_cours===null?'—':c.moyenne_cours}</span>
+                          </div>
+                          <div style={{padding:'10px 14px'}}>
+                            {c.notes.map(n=>(
+                              <div key={n.id_note} style={{display:'flex',justifyContent:'space-between',fontSize:'.85rem',padding:'3px 0',color:'var(--muted)'}}>
+                                <span>{n.type_evaluation} (coef {n.coefficient}){n.validee?' 🔒':''}</span>
+                                <span style={{color:'var(--ink)',fontWeight:500}}>{n.valeur}/20</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>}
+              </div>
+            )}
+        </div>
+      );
     }
 
     function AgendaEDT({ tick }) {
@@ -406,12 +487,12 @@
       columns:[
         {key:'num_etudiant',label:'N°',pill:true},{key:'nom',label:'Nom',style:{fontWeight:500}},
         {key:'prenom',label:'Prénom'},{key:'email',label:'Email',style:{color:'var(--muted)'}},
-        {key:'filiere',label:'Filière'},{key:'niveau',label:'Niveau'}
+        {key:'niveau',label:'Niveau'},{key:'groupe',label:'Groupe'}
       ],
       fields:[
         {key:'nom',label:'Nom',half:true},{key:'prenom',label:'Prénom',half:true},
         {key:'email',label:'Email',type:'email'},
-        {key:'filiere',label:'Filière',half:true,ph:'Informatique'},{key:'niveau',label:'Niveau',half:true,ph:'L2'}
+        {key:'niveau',label:'Niveau',half:true,ph:'ING2'},{key:'groupe',label:'Groupe',type:'number',half:true,ph:'1'}
       ]
     };
     const CONF_ENS = {
@@ -481,7 +562,7 @@
       const notify=(msg,ok)=>{ setToast({msg,ok}); setTimeout(()=>setToast(null),3500); };
       const logout=async()=>{ await apiCall('api/auth/logout.php',{method:'POST'}); onLogout(); };
       const isAdmin=user.role==='administrateur';
-      const titres={dashboard:'Tableau de bord',etudiants:'Étudiants',enseignants:'Enseignants',cours:'Cours',inscriptions:'Inscriptions',notes:'Notes',edt:'Emploi du temps'};
+      const titres={dashboard:'Tableau de bord',etudiants:'Étudiants',enseignants:'Enseignants',cours:'Cours',inscriptions:'Inscriptions',notes:'Notes',edt:'Emploi du temps',bulletins:'Bulletins'};
       return (
         <div className="shell">
           <aside className="sidebar">
@@ -494,6 +575,7 @@
             {isAdmin && <button className={'nav-item'+(view==='inscriptions'?' active':'')} onClick={()=>setView('inscriptions')}><span className="ico">📝</span> Inscriptions</button>}
             {isAdmin && <button className={'nav-item'+(view==='notes'?' active':'')} onClick={()=>setView('notes')}><span className="ico">🏆</span> Notes</button>}
             {isAdmin && <button className={'nav-item'+(view==='edt'?' active':'')} onClick={()=>setView('edt')}><span className="ico">📅</span> Emploi du temps</button>}
+            {isAdmin && <button className={'nav-item'+(view==='bulletins'?' active':'')} onClick={()=>setView('bulletins')}><span className="ico">📄</span> Bulletins</button>}
             <div className="sidebar-foot">SmartCampus · 2026<br/>Projet Web dynamique — ECE</div>
           </aside>
           <div className="main">
@@ -513,6 +595,7 @@
               {view==='inscriptions' && isAdmin && <InscriptionsView notify={notify} />}
               {view==='notes' && isAdmin && <NotesView notify={notify} />}
               {view==='edt' && isAdmin && <EmploiDuTempsView notify={notify} />}
+              {view==='bulletins' && isAdmin && <BulletinView notify={notify} />}
             </main>
           </div>
           {toast && <div className={'toast '+(toast.ok?'ok':'err')}>{toast.ok?'✅':'⚠️'} {toast.msg}</div>}
