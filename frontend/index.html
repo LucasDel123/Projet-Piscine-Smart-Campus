@@ -557,30 +557,321 @@
       ]
     };
 
-    function Shell({ user, onLogout }) {
-      const [view,setView]=useState('dashboard'); const [toast,setToast]=useState(null);
+    function AgendaJours({ seances }) {
+      const parJour={};
+      seances.forEach(s=>{ (parJour[s.date_seance]=parJour[s.date_seance]||[]).push(s); });
+      const jours=Object.keys(parJour).sort();
+      const fmtJour=(d)=>{ try{ const dt=new Date(d+'T00:00:00');
+        const t=dt.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+        return t.charAt(0).toUpperCase()+t.slice(1); }catch(e){ return d; } };
+      if(jours.length===0) return <div className="empty">Aucune séance programmée.</div>;
+      return (
+        <div style={{display:'flex',gap:16,overflowX:'auto',paddingBottom:8}}>
+          {jours.map(j=>(
+            <div key={j} style={{minWidth:230,flex:'0 0 auto',background:'var(--surface)',border:'1px solid var(--line)',borderRadius:'var(--radius)',boxShadow:'var(--shadow)',overflow:'hidden'}}>
+              <div style={{padding:'12px 14px',background:'var(--ink)',color:'#fff',fontFamily:'Sora',fontWeight:600,fontSize:'.85rem'}}>{fmtJour(j)}</div>
+              <div style={{padding:12,display:'flex',flexDirection:'column',gap:10}}>
+                {parJour[j].map(s=>(
+                  <div key={s.id_seance} style={{borderLeft:'3px solid var(--primary)',background:'#f8fafc',borderRadius:8,padding:'9px 11px'}}>
+                    <div style={{fontFamily:'Sora',fontWeight:600,fontSize:'.82rem',color:'var(--primary-d)'}}>{s.horaire}</div>
+                    <div style={{fontWeight:500,fontSize:'.88rem',color:'var(--ink)',margin:'2px 0'}}>{s.code_cours} · {s.cours}</div>
+                    <div style={{fontSize:'.78rem',color:'var(--muted)'}}>🏫 {s.salle}{s.enseignant?` · 👤 ${s.enseignant}`:''}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    function BulletinCards({ data }) {
+      return (
+        <div style={{padding:22}}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:18,flexWrap:'wrap',gap:12}}>
+            <div style={{fontFamily:'Sora',fontWeight:700,fontSize:'1.1rem',color:'var(--ink)'}}>{data.etudiant}</div>
+            <div style={{background:'var(--ink)',color:'#fff',padding:'8px 16px',borderRadius:12,fontFamily:'Sora',fontWeight:700}}>Moyenne générale : {data.moyenne_generale===null?'—':data.moyenne_generale} / 20</div>
+          </div>
+          {data.bulletin.length===0 ? <div className="empty">Aucune note enregistrée.</div>
+            : <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))',gap:16}}>
+                {data.bulletin.map(c=>(
+                  <div key={c.id_cours} style={{border:'1px solid var(--line)',borderRadius:'var(--radius)',overflow:'hidden'}}>
+                    <div style={{padding:'12px 14px',borderBottom:'1px solid var(--line)',display:'flex',justifyContent:'space-between',alignItems:'center',gap:8}}>
+                      <div><span className="pill">{c.code_cours}</span> <span style={{fontWeight:500}}>{c.intitule}</span></div>
+                      <span className="tag-ok">{c.moyenne_cours===null?'—':c.moyenne_cours}</span>
+                    </div>
+                    <div style={{padding:'10px 14px'}}>
+                      {c.notes.map(n=>(
+                        <div key={n.id_note} style={{display:'flex',justifyContent:'space-between',fontSize:'.85rem',padding:'3px 0',color:'var(--muted)'}}>
+                          <span>{n.type_evaluation} (coef {n.coefficient}){n.validee?' 🔒':''}</span>
+                          <span style={{color:'var(--ink)',fontWeight:500}}>{n.valeur}/20</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>}
+        </div>
+      );
+    }
+
+    function EtuDashboard({ user }) {
+      const [nbCours,setNbCours]=useState(null); const [moy,setMoy]=useState(undefined);
+      useEffect(()=>{
+        apiCall('api/inscriptions/list.php').then(r=>{ if(r.success) setNbCours(r.data.filter(i=>String(i.id_etudiant)===String(user.id)).length); });
+        apiCall('api/notes/bulletin.php?id_etudiant='+user.id).then(r=>{ if(r.success) setMoy(r.data.moyenne_generale); });
+      },[]);
+      return (
+        <div>
+          <h2 style={{fontSize:'1.4rem',color:'var(--ink)',marginBottom:6}}>Bonjour {user.prenom} 👋</h2>
+          <p style={{color:'var(--muted)',marginBottom:26}}>Bienvenue sur votre espace étudiant.</p>
+          <div className="stat-grid">
+            <div className="stat"><span className="ico">📚</span><div className="lab">Mes cours</div><div className="val">{nbCours===null?'…':nbCours}</div></div>
+            <div className="stat"><span className="ico">📄</span><div className="lab">Moyenne générale</div><div className="val">{moy===undefined?'…':(moy===null?'—':moy)}</div></div>
+          </div>
+          <div className="panel"><div className="panel-head"><div><h3>Mon compte</h3><div className="sub">Informations personnelles</div></div></div>
+            <div style={{padding:22,color:'var(--muted)',lineHeight:1.7}}>
+              {user.prenom} {user.nom} — {user.email}<br/>Utilisez le menu pour consulter vos cours, votre bulletin et votre emploi du temps.
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function EtuCours({ user }) {
+      const [insc,setInsc]=useState([]); const [loading,setLoading]=useState(true);
+      useEffect(()=>{ apiCall('api/inscriptions/list.php').then(r=>{ setLoading(false); if(r.success) setInsc(r.data.filter(i=>String(i.id_etudiant)===String(user.id))); }); },[]);
+      return (
+        <div className="panel">
+          <div className="panel-head"><div><h3>Mes cours</h3><div className="sub">{insc.length} cours suivi(s)</div></div></div>
+          {loading ? <div className="empty">Chargement…</div>
+            : insc.length===0 ? <div className="empty">Vous n'êtes inscrit à aucun cours.</div>
+            : <table><thead><tr><th>Code</th><th>Cours</th><th>Inscrit le</th></tr></thead>
+                <tbody>{insc.map(i=>(<tr key={i.id_inscription}><td><span className="pill">{i.code_cours}</span></td><td style={{fontWeight:500}}>{i.cours}</td><td style={{color:'var(--muted)'}}>{i.date_inscription}</td></tr>))}</tbody>
+              </table>}
+        </div>
+      );
+    }
+
+    function EtuBulletin({ user }) {
+      const [data,setData]=useState(null); const [loading,setLoading]=useState(true);
+      useEffect(()=>{ apiCall('api/notes/bulletin.php?id_etudiant='+user.id).then(r=>{ setLoading(false); if(r.success) setData(r.data); }); },[]);
+      return (
+        <div className="panel">
+          <div className="panel-head"><div><h3>Mon bulletin</h3><div className="sub">Vos notes et moyennes pondérées</div></div></div>
+          {loading ? <div className="empty">Chargement…</div> : !data ? <div className="empty">Bulletin indisponible.</div> : <BulletinCards data={data} />}
+        </div>
+      );
+    }
+
+    function EtuEDT({ user }) {
+      const [seances,setSeances]=useState([]); const [loading,setLoading]=useState(true);
+      useEffect(()=>{
+        Promise.all([apiCall('api/inscriptions/list.php'), apiCall('api/seances/list.php')]).then(([ri,rs])=>{
+          setLoading(false);
+          if(ri.success && rs.success){
+            const mesCours=new Set(ri.data.filter(i=>String(i.id_etudiant)===String(user.id)).map(i=>String(i.id_cours)));
+            setSeances(rs.data.filter(s=>mesCours.has(String(s.id_cours))));
+          }
+        });
+      },[]);
+      return (
+        <div>
+          <h3 style={{fontSize:'1.05rem',color:'var(--ink)',marginBottom:14}}>📅 Mon emploi du temps</h3>
+          {loading ? <div className="empty">Chargement…</div> : <AgendaJours seances={seances} />}
+        </div>
+      );
+    }
+
+    function ProfDashboard({ user }) {
+      const [nb,setNb]=useState({cours:null,etudiants:null,notes:null});
+      useEffect(()=>{
+        apiCall('api/cours/list.php').then(r=>{ if(r.success){
+          const mes=r.data.filter(c=>String(c.id_enseignant)===String(user.id));
+          const ids=new Set(mes.map(c=>String(c.id_cours)));
+          const codes=new Set(mes.map(c=>c.code_cours));
+          setNb(s=>({...s,cours:mes.length}));
+          apiCall('api/inscriptions/list.php').then(ri=>{ if(ri.success){
+            const etu=new Set(ri.data.filter(i=>ids.has(String(i.id_cours))).map(i=>String(i.id_etudiant)));
+            setNb(s=>({...s,etudiants:etu.size}));
+          }});
+          apiCall('api/notes/list.php').then(rn=>{ if(rn.success) setNb(s=>({...s,notes:rn.data.filter(n=>codes.has(n.code_cours)).length})); });
+        }});
+      },[]);
+      return (
+        <div>
+          <h2 style={{fontSize:'1.4rem',color:'var(--ink)',marginBottom:6}}>Bonjour {user.prenom} 👋</h2>
+          <p style={{color:'var(--muted)',marginBottom:26}}>Bienvenue sur votre espace enseignant.</p>
+          <div className="stat-grid">
+            <div className="stat"><span className="ico">📚</span><div className="lab">Mes cours</div><div className="val">{nb.cours===null?'…':nb.cours}</div></div>
+            <div className="stat"><span className="ico">👥</span><div className="lab">Mes étudiants</div><div className="val">{nb.etudiants===null?'…':nb.etudiants}</div></div>
+            <div className="stat"><span className="ico">🏆</span><div className="lab">Notes saisies</div><div className="val">{nb.notes===null?'…':nb.notes}</div></div>
+          </div>
+        </div>
+      );
+    }
+
+    function ProfCours({ user }) {
+      const [cours,setCours]=useState([]); const [loading,setLoading]=useState(true);
+      useEffect(()=>{ apiCall('api/cours/list.php').then(r=>{ setLoading(false); if(r.success) setCours(r.data.filter(c=>String(c.id_enseignant)===String(user.id))); }); },[]);
+      return (
+        <div className="panel">
+          <div className="panel-head"><div><h3>Mes cours</h3><div className="sub">{cours.length} cours enseigné(s)</div></div></div>
+          {loading ? <div className="empty">Chargement…</div>
+            : cours.length===0 ? <div className="empty">Aucun cours ne vous est attribué.</div>
+            : <table><thead><tr><th>Code</th><th>Intitulé</th><th>Semestre</th><th>Remplissage</th><th>Crédits</th></tr></thead>
+                <tbody>{cours.map(c=>(<tr key={c.id_cours}><td><span className="pill">{c.code_cours}</span></td><td style={{fontWeight:500}}>{c.intitule}</td><td>{c.semestre}</td><td>{c.remplissage}</td><td>{c.credits}</td></tr>))}</tbody>
+              </table>}
+        </div>
+      );
+    }
+
+    function ProfNoteModal({ modal, notify, onClose, onSaved }) {
+      const [type,setType]=useState('CC1'); const [valeur,setValeur]=useState(''); const [coef,setCoef]=useState('1'); const [busy,setBusy]=useState(false);
+      const submit=async()=>{ setBusy(true);
+        const r=await apiCall('api/notes/create.php',{method:'POST',body:{id_inscription:modal.id_inscription, type_evaluation:type, valeur:Number(valeur), coefficient:Number(coef)}});
+        setBusy(false); notify(r.message,r.success); if(r.success) onSaved();
+      };
+      return (
+        <div className="overlay" onClick={onClose}>
+          <div className="modal" onClick={e=>e.stopPropagation()}>
+            <div className="modal-head"><h3>Nouvelle note — {modal.etudiant}</h3></div>
+            <div className="modal-body">
+              <div className="form-grid">
+                <div className="field"><label>Type</label>
+                  <select value={type} onChange={e=>setType(e.target.value)}>{['CC1','CC2','DS','Examen','Projet'].map(t=><option key={t} value={t}>{t}</option>)}</select></div>
+                <div className="field"><label>Note (0-20)</label><input type="number" min="0" max="20" step="0.5" value={valeur} onChange={e=>setValeur(e.target.value)} /></div>
+              </div>
+              <div className="field"><label>Coefficient</label><input type="number" min="0" step="0.1" value={coef} onChange={e=>setCoef(e.target.value)} /></div>
+            </div>
+            <div className="modal-foot">
+              <button className="btn-ghost" onClick={onClose}>Annuler</button>
+              <button className="btn-add" onClick={submit} disabled={busy}>{busy?'Enregistrement…':'Enregistrer'}</button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function ProfNotes({ user, notify }) {
+      const [cours,setCours]=useState([]); const [sel,setSel]=useState('');
+      const [inscrits,setInscrits]=useState([]); const [notes,setNotes]=useState([]); const [modal,setModal]=useState(null);
+      useEffect(()=>{ apiCall('api/cours/list.php').then(r=>{ if(r.success) setCours(r.data.filter(c=>String(c.id_enseignant)===String(user.id))); }); },[]);
+      const charger=useCallback(()=>{
+        if(!sel){ setInscrits([]); setNotes([]); return; }
+        apiCall('api/inscriptions/list.php').then(r=>{ if(r.success) setInscrits(r.data.filter(i=>String(i.id_cours)===String(sel))); });
+        apiCall('api/notes/list.php').then(r=>{ if(r.success) setNotes(r.data); });
+      },[sel]);
+      useEffect(()=>{ charger(); },[sel]);
+      const notesDe=(id)=> notes.filter(n=>String(n.id_inscription)===String(id));
+      const valider=async(id)=>{ if(!confirm('Valider cette note ? Elle sera verrouillée.'))return; const r=await apiCall('api/notes/validate.php',{method:'POST',body:{id_note:id}}); notify(r.message,r.success); if(r.success) charger(); };
+      const supprimer=async(id)=>{ if(!confirm('Supprimer cette note ?'))return; const r=await apiCall('api/notes/delete.php',{method:'POST',body:{id_note:id}}); notify(r.message,r.success); if(r.success) charger(); };
+      return (
+        <div>
+          <div className="panel">
+            <div className="panel-head">
+              <div><h3>Saisie des notes</h3><div className="sub">Sélectionnez un de vos cours</div></div>
+              <div className="toolbar">
+                <select className="search" style={{width:300}} value={sel} onChange={e=>setSel(e.target.value)}>
+                  <option value="">— Choisir un cours —</option>
+                  {cours.map(c=><option key={c.id_cours} value={String(c.id_cours)}>{c.code_cours} — {c.intitule}</option>)}
+                </select>
+              </div>
+            </div>
+            {!sel ? <div className="empty">Choisissez un cours pour saisir des notes.</div>
+              : inscrits.length===0 ? <div className="empty">Aucun étudiant inscrit à ce cours.</div>
+              : <table>
+                  <thead><tr><th>Étudiant</th><th>Notes</th><th></th></tr></thead>
+                  <tbody>
+                    {inscrits.map(i=>(
+                      <tr key={i.id_inscription}>
+                        <td style={{fontWeight:500}}>{i.etudiant}</td>
+                        <td>
+                          <div style={{display:'flex',flexWrap:'wrap',gap:6,alignItems:'center'}}>
+                            {notesDe(i.id_inscription).length===0 ? <span style={{color:'var(--muted)',fontSize:'.85rem'}}>—</span>
+                              : notesDe(i.id_inscription).map(n=>(
+                                <span key={n.id_note} className={Number(n.validee)===1?'tag-ok':'tag-wait'} style={{display:'inline-flex',alignItems:'center',gap:5}}>
+                                  {n.type_evaluation} {n.valeur}/20
+                                  {Number(n.validee)!==1 && <button className="ic-btn" title="Valider" style={{width:22,height:22,fontSize:'.7rem'}} onClick={()=>valider(n.id_note)}>🔒</button>}
+                                  {Number(n.validee)!==1 && <button className="ic-btn del" title="Supprimer" style={{width:22,height:22,fontSize:'.7rem'}} onClick={()=>supprimer(n.id_note)}>🗑️</button>}
+                                </span>
+                              ))}
+                          </div>
+                        </td>
+                        <td><button className="btn-add" style={{padding:'6px 12px',fontSize:'.82rem'}} onClick={()=>setModal({id_inscription:i.id_inscription, etudiant:i.etudiant})}>+ Note</button></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>}
+          </div>
+          {modal && <ProfNoteModal modal={modal} notify={notify} onClose={()=>setModal(null)} onSaved={()=>{ setModal(null); charger(); }} />}
+        </div>
+      );
+    }
+
+    function ProfEDT({ user }) {
+      const [seances,setSeances]=useState([]); const [loading,setLoading]=useState(true);
+      useEffect(()=>{
+        Promise.all([apiCall('api/cours/list.php'), apiCall('api/seances/list.php')]).then(([rc,rs])=>{
+          setLoading(false);
+          if(rc.success && rs.success){
+            const mesCours=new Set(rc.data.filter(c=>String(c.id_enseignant)===String(user.id)).map(c=>String(c.id_cours)));
+            setSeances(rs.data.filter(s=>mesCours.has(String(s.id_cours))));
+          }
+        });
+      },[]);
+      return (
+        <div>
+          <h3 style={{fontSize:'1.05rem',color:'var(--ink)',marginBottom:14}}>📅 Mon emploi du temps</h3>
+          {loading ? <div className="empty">Chargement…</div> : <AgendaJours seances={seances} />}
+        </div>
+      );
+    }
+
+    const MENUS = {
+      administrateur: [
+        {key:'dashboard', icon:'📊', label:'Tableau de bord', render:(p)=><Dashboard user={p.user} />},
+        {key:'etudiants', icon:'👥', label:'Étudiants', render:(p)=><CrudTable config={CONF_ETU} notify={p.notify} />},
+        {key:'enseignants', icon:'🎓', label:'Enseignants', render:(p)=><CrudTable config={CONF_ENS} notify={p.notify} />},
+        {key:'cours', icon:'📚', label:'Cours', render:(p)=><CoursView notify={p.notify} />},
+        {key:'inscriptions', icon:'📝', label:'Inscriptions', render:(p)=><InscriptionsView notify={p.notify} />},
+        {key:'notes', icon:'🏆', label:'Notes', render:(p)=><NotesView notify={p.notify} />},
+        {key:'edt', icon:'📅', label:'Emploi du temps', render:(p)=><EmploiDuTempsView notify={p.notify} />},
+        {key:'bulletins', icon:'📄', label:'Bulletins', render:(p)=><BulletinView notify={p.notify} />},
+      ],
+      enseignant: [
+        {key:'dashboard', icon:'📊', label:'Tableau de bord', render:(p)=><ProfDashboard user={p.user} />},
+        {key:'mescours', icon:'📚', label:'Mes cours', render:(p)=><ProfCours user={p.user} />},
+        {key:'saisie', icon:'🏆', label:'Saisie des notes', render:(p)=><ProfNotes user={p.user} notify={p.notify} />},
+        {key:'edt', icon:'📅', label:'Mon emploi du temps', render:(p)=><ProfEDT user={p.user} />},
+      ],
+      etudiant: [
+        {key:'dashboard', icon:'📊', label:'Tableau de bord', render:(p)=><EtuDashboard user={p.user} />},
+        {key:'mescours', icon:'📚', label:'Mes cours', render:(p)=><EtuCours user={p.user} />},
+        {key:'bulletin', icon:'📄', label:'Mon bulletin', render:(p)=><EtuBulletin user={p.user} />},
+        {key:'edt', icon:'📅', label:'Mon emploi du temps', render:(p)=><EtuEDT user={p.user} />},
+      ],
+    };
+
+    function Shell({ user, onLogout, menu }) {
+      const [view,setView]=useState(menu[0].key); const [toast,setToast]=useState(null);
       const notify=(msg,ok)=>{ setToast({msg,ok}); setTimeout(()=>setToast(null),3500); };
       const logout=async()=>{ await apiCall('api/auth/logout.php',{method:'POST'}); onLogout(); };
       const isAdmin=user.role==='administrateur';
-      const titres={dashboard:'Tableau de bord',etudiants:'Étudiants',enseignants:'Enseignants',cours:'Cours',inscriptions:'Inscriptions',notes:'Notes',edt:'Emploi du temps',bulletins:'Bulletins'};
+      const current=menu.find(m=>m.key===view)||menu[0];
       return (
         <div className="shell">
           <aside className="sidebar">
             <div className="brand"><div className="brand-logo">S</div><div className="brand-name">Smart<span style={{color:'var(--primary-l)'}}>Campus</span></div></div>
             <div className="nav-label">Navigation</div>
-            <button className={'nav-item'+(view==='dashboard'?' active':'')} onClick={()=>setView('dashboard')}><span className="ico">📊</span> Tableau de bord</button>
-            {isAdmin && <button className={'nav-item'+(view==='etudiants'?' active':'')} onClick={()=>setView('etudiants')}><span className="ico">👥</span> Étudiants</button>}
-            {isAdmin && <button className={'nav-item'+(view==='enseignants'?' active':'')} onClick={()=>setView('enseignants')}><span className="ico">🎓</span> Enseignants</button>}
-            {isAdmin && <button className={'nav-item'+(view==='cours'?' active':'')} onClick={()=>setView('cours')}><span className="ico">📚</span> Cours</button>}
-            {isAdmin && <button className={'nav-item'+(view==='inscriptions'?' active':'')} onClick={()=>setView('inscriptions')}><span className="ico">📝</span> Inscriptions</button>}
-            {isAdmin && <button className={'nav-item'+(view==='notes'?' active':'')} onClick={()=>setView('notes')}><span className="ico">🏆</span> Notes</button>}
-            {isAdmin && <button className={'nav-item'+(view==='edt'?' active':'')} onClick={()=>setView('edt')}><span className="ico">📅</span> Emploi du temps</button>}
-            {isAdmin && <button className={'nav-item'+(view==='bulletins'?' active':'')} onClick={()=>setView('bulletins')}><span className="ico">📄</span> Bulletins</button>}
+            {menu.map(m=>(
+              <button key={m.key} className={'nav-item'+(view===m.key?' active':'')} onClick={()=>setView(m.key)}><span className="ico">{m.icon}</span> {m.label}</button>
+            ))}
             <div className="sidebar-foot">SmartCampus · 2026<br/>Projet Web dynamique — ECE</div>
           </aside>
           <div className="main">
             <header className="topbar">
-              <h1>{titres[view]}</h1>
+              <h1>{current.label}</h1>
               <div className="user-chip">
                 <div className="user-meta"><div className="nm">{user.prenom} {user.nom}</div><span className={'badge'+(isAdmin?' admin':'')}>{ROLE_LABEL[user.role]}</span></div>
                 <div className="avatar">{initiales(user)}</div>
@@ -588,14 +879,7 @@
               </div>
             </header>
             <main className="content" key={view}>
-              {view==='dashboard' && <Dashboard user={user} />}
-              {view==='etudiants' && isAdmin && <CrudTable config={CONF_ETU} notify={notify} />}
-              {view==='enseignants' && isAdmin && <CrudTable config={CONF_ENS} notify={notify} />}
-              {view==='cours' && isAdmin && <CoursView notify={notify} />}
-              {view==='inscriptions' && isAdmin && <InscriptionsView notify={notify} />}
-              {view==='notes' && isAdmin && <NotesView notify={notify} />}
-              {view==='edt' && isAdmin && <EmploiDuTempsView notify={notify} />}
-              {view==='bulletins' && isAdmin && <BulletinView notify={notify} />}
+              {current.render({ user, notify })}
             </main>
           </div>
           {toast && <div className={'toast '+(toast.ok?'ok':'err')}>{toast.ok?'✅':'⚠️'} {toast.msg}</div>}
@@ -608,7 +892,8 @@
       useEffect(()=>{ apiCall('api/auth/me.php').then(r=>{ if(r.success) setUser(r.data); setLoading(false); }); },[]);
       if(loading) return <div className="spinner-wrap"><div className="spinner"></div></div>;
       if(!user) return <Login onLogin={setUser} />;
-      return <Shell user={user} onLogout={()=>setUser(null)} />;
+      const menu = MENUS[user.role] || MENUS.etudiant;
+      return <Shell user={user} onLogout={()=>setUser(null)} menu={menu} />;
     }
 
     ReactDOM.createRoot(document.getElementById('root')).render(<App />);
